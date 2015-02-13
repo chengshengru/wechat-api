@@ -30,6 +30,10 @@ public class ConfigManager {
 		return mInstance;
 	}
 
+    /**
+     * 开发者AppID
+     * @return
+     */
 	public String getAppId() {
 		if (mProperties != null) {
 			return mProperties.getProperty("wechat.api.appid", null);
@@ -37,6 +41,10 @@ public class ConfigManager {
 		return null;
 	}
 
+    /**
+     * 开发者AppSecret
+     * @return
+     */
 	public String getAppSecret() {
 		if (mProperties != null) {
 			return mProperties.getProperty("wechat.api.appsecret", null);
@@ -44,6 +52,10 @@ public class ConfigManager {
 		return null;
 	}
 
+    /**
+     * 与微信服务器对接的Token
+     * @return
+     */
 	public String getToken() {
 		if (mProperties != null) {
 			return mProperties.getProperty("wechat.api.token", null);
@@ -58,13 +70,27 @@ public class ConfigManager {
 		}
 		return null;
 	}
-	
-	
-	
+
+
+    /**
+     * 授权回调地址
+     * @return
+     */
 	public String getOAuthUrl(){
 		if (mProperties != null) {
 			return mProperties.getProperty("wechat.oauth.url", null);
 		}
 		return null;
 	}
+
+    /**
+     * 公众号群发助手的微信号，为mphelper
+     * @return
+     */
+    public String getWechatHelper(){
+        if (mProperties != null) {
+            return mProperties.getProperty("wechat.mp.helper", "mphelper");
+        }
+        return "mphelper";
+    }
 }

@@ -17,6 +17,7 @@
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <httpclient.version>4.3.5</httpclient.version>
+      <wechat.api.version>0.0.1</wechat.api.version>
   </properties>
 
   <dependencies>
@@ -73,6 +74,7 @@
           <groupId>net.sf.json-lib</groupId>
           <artifactId>json-lib</artifactId>
           <version>2.4</version>
+          <classifier>jdk15</classifier>
       </dependency>
   </dependencies>
 </project>

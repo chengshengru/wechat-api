@@ -19,6 +19,7 @@ public class AppTest extends TestCase {
 	public AppTest(String testName) {
 		super(testName);
 
+
 	}
 
 	/**

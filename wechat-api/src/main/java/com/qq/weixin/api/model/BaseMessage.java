@@ -97,4 +97,14 @@ public abstract class BaseMessage implements Serializable {
 	public void setMsgType(String msgType) {
 		MsgType = msgType;
 	}
+
+    @Override
+    public String toString() {
+        return "BaseMessage{" +
+                "ToUserName='" + ToUserName + '\'' +
+                ", FromUserName='" + FromUserName + '\'' +
+                ", CreateTime='" + CreateTime + '\'' +
+                ", MsgType='" + MsgType + '\'' +
+                '}';
+    }
 }

@@ -92,7 +92,7 @@ public final class WechatConstant {
 	 * 上传图文消息素材【订阅号与服务号认证后均可用】
 	 */
 	public static final String WX_UPLOAD_MEDIA_URL = WX_API_MEDIA_URL
-			+ "/uploadnews?access_token=";
+			+ "/uploadnews?access_token=%s";
 
 	public static final String WX_API_MESSAGE_MASS_URL = WX_API_URL
 			+ "/message/mass";
@@ -101,12 +101,19 @@ public final class WechatConstant {
 	 * 根据分组进行群发【订阅号与服务号认证后均可用】
 	 */
 	public static final String WX_MESSAGE_SEND_ALL_URL = WX_API_MESSAGE_MASS_URL
-			+ "/sendall?access_token=";
+			+ "/sendall?access_token=%s";
+
+    /**
+     * 根据OpenID列表群发【订阅号不可用，服务号认证后可用】
+     */
+    public static final String WX_MESSAGE_SEND_URL = WX_API_MESSAGE_MASS_URL
+            + "/send?access_token=%s";
+
 	/**
 	 * 删除群发【订阅号与服务号认证后均可用】
 	 */
 	public static final String WX_MESSAGE_DELETE_URL = WX_API_MESSAGE_MASS_URL
-			+ "/sendall?access_token=";
+			+ "/delete?access_token=%s";
 	/**
 	 * 预览接口【订阅号与服务号认证后均可用】
 	 */
@@ -117,7 +124,7 @@ public final class WechatConstant {
 	 * 查询群发消息发送状态【订阅号与服务号认证后均可用】
 	 */
 	public static final String WX_MESSAGE_GET_STATUS_URL = WX_API_MESSAGE_MASS_URL
-			+ "/get?access_token=";
+			+ "/get?access_token=%s";
 
 
     /**

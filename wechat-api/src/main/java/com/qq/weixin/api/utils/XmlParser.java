@@ -6,16 +6,10 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.qq.weixin.api.model.event.*;
 import org.apache.commons.lang.StringUtils;
 
 import com.qq.weixin.api.model.BaseMessage;
-import com.qq.weixin.api.model.event.BaseEventMessage;
-import com.qq.weixin.api.model.event.EventClickMessage;
-import com.qq.weixin.api.model.event.EventLocationMessage;
-import com.qq.weixin.api.model.event.EventPicMessage;
-import com.qq.weixin.api.model.event.EventScanMessage;
-import com.qq.weixin.api.model.event.EventSubscribeMessage;
-import com.qq.weixin.api.model.event.EventViewMessage;
 import com.qq.weixin.api.model.message.ImageMessage;
 import com.qq.weixin.api.model.message.LinkMessage;
 import com.qq.weixin.api.model.message.LocationMessage;
@@ -96,7 +90,10 @@ public class XmlParser {
 
 							xStream.processAnnotations(EventPicMessage.class);
 							msg = (EventPicMessage) xStream.fromXML(xml);
-						}
+						}else if(eventType.contains("masssendjobfinish")){
+                            xStream.processAnnotations(EventJobFinishMessage.class);
+                            msg = (EventJobFinishMessage) xStream.fromXML(xml);
+                        }
 					}
 				} else {
 					if (msgType.contains(BaseMessage.WX_MSG_TYPE_TEXT)) {

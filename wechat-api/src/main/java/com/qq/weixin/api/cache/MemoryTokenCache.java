@@ -4,7 +4,6 @@ import com.qq.weixin.api.model.AccessToken;
 
 /**
  * 内存缓存Token
- * Created by 程胜儒 on 2015/2/6.
  */
 public class MemoryTokenCache implements TokenCacheAware {
 

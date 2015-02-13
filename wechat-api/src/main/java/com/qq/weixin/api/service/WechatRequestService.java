@@ -6,12 +6,12 @@ import com.qq.weixin.api.cache.TokenCacheAware;
 import com.qq.weixin.api.config.ConfigManager;
 import com.qq.weixin.api.model.*;
 import com.qq.weixin.api.network.WechatHttpUtils;
+import com.qq.weixin.api.security.WechatSecurity;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -468,6 +468,205 @@ public class WechatRequestService {
                     + ") Or News is NULL or Empty!");
         }
     }
+
+
+    /**
+     * 删除微信群发
+     *
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    public boolean deleteWechatMedia(Long id) throws Exception {
+        if (id != null) {
+            JSONObject p = new JSONObject();
+            p.put("msg_id", id);
+            String result = WechatHttpUtils
+                    .post(String.format(WechatConstant.WX_MESSAGE_DELETE_URL
+                            , getWechatToken()), p.toString());
+            if (result.contains("ok")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * 根据OpenID列表群发【订阅号不可用，服务号认证后可用】
+     *
+     * @param type
+     * @param openIds          OpenID列表
+     * @param mediaIdOrContent 如果type为text 表示文本内容 否则是多媒体的id
+     * @return
+     * @throws Exception
+     */
+    public Long sendMediaWithOpenIds(String type, String[] openIds,
+                                     String mediaIdOrContent) throws Exception {
+        if (openIds == null || openIds.length == 0) {
+            return null;
+        }
+
+        JSONObject data = new JSONObject();
+        if ("mpnews".equals(type) || "image".equals(type)
+                || "mpvideo".equals(type) || "voice".equals(type)) {
+            JSONObject mpnews = new JSONObject();
+            mpnews.put(type, mediaIdOrContent);
+            data.put(mpnews, mpnews);
+        } else if ("text".equals(type)) {
+            JSONObject text = new JSONObject();
+            text.put("content", mediaIdOrContent);
+            data.put("text", text);
+        } else {
+            return -1l;
+        }
+        data.put("msgtype", type);
+        data.put("touser", JSONArray.fromObject(openIds));
+
+        String result = WechatHttpUtils.post(
+                String.format(WechatConstant.WX_MESSAGE_SEND_URL, getWechatToken()),
+                data.toString());
+        JSONObject json = JSONObject.fromObject(result);
+        return json.optLong("msg_id", -1l);
+
+    }
+
+    /**
+     * 根据分组进行群发【订阅号与服务号认证后均可用】
+     *
+     * @param type
+     * @param groupId     微信分组id（为空则是群发）
+     * @param idOrContent 如果type为text 表示文本内容 否则是多媒体的id
+     * @return
+     * @throws Exception
+     */
+    public Long sendMediaWidthGroup(String type, String groupId, String idOrContent) throws Exception {
+        JSONObject data = new JSONObject();
+        if ("mpnews".equals(type) || "image".equals(type)
+                || "mpvideo".equals(type) || "voice".equals(type)) {
+            JSONObject mpnews = new JSONObject();
+            mpnews.put(type, idOrContent);
+            data.put(mpnews, mpnews);
+        } else if ("text".equals(type)) {
+            JSONObject text = new JSONObject();
+            text.put("content", idOrContent);
+            data.put("text", text);
+        } else {
+            return -1l;
+        }
+        data.put("msgtype", type);
+        JSONObject filter = new JSONObject();
+        if (!StringUtils.isEmpty(groupId)) {
+            filter.put("is_to_all", false);
+            filter.put("group_id", groupId);
+        } else {
+            filter.put("is_to_all", true);
+        }
+        data.put("filter", filter);
+        String result = WechatHttpUtils.post(
+                WechatConstant.WX_MESSAGE_SEND_ALL_URL + getWechatToken(),
+                data.toString());
+        JSONObject json = JSONObject.fromObject(result);
+        return json.optLong("msg_id", -1l);
+
+    }
+
+    /**
+     * 上传图文消息素材【订阅号与服务号认证后均可用】
+     *
+     * @param medias
+     * @return
+     * @throws Exception
+     */
+    public WechatMedia uploadWechatMedia(List<WechatArticleMedia> medias) throws Exception {
+
+        if (medias != null && medias.size() > 0) {
+            if (medias.size() > 10) {
+                throw new RuntimeException("图文消息不能超过10条");
+            }
+            JSONObject data = new JSONObject();
+            data.put("articles", JSONArray.fromObject(medias));
+            String result = WechatHttpUtils.post(
+                    String.format(WechatConstant.WX_UPLOAD_MEDIA_URL, getWechatToken()),
+                    data.toString());
+            return (WechatMedia) JSONObject.toBean(JSONObject
+                    .fromObject(result));
+        }
+        return null;
+    }
+
+    /**
+     * 查询群发消息发送状态【订阅号与服务号认证后均可用】
+     *
+     * @param msgId 群发消息后返回的消息id
+     * @return 消息发送后的状态，SEND_SUCCESS表示发送成功
+     * @throws Exception
+     */
+    public String getMediaSendStatus(Long msgId) throws Exception {
+        JSONObject param = new JSONObject();
+        param.put("msg_id", msgId);
+        String result = WechatHttpUtils
+                .post(String.format(WechatConstant.WX_MESSAGE_GET_STATUS_URL
+                        , getWechatToken()), param.toString());
+        JSONObject json = JSONObject.fromObject(result);
+        return json.optString("msg_status", null);
+    }
+
+    /**
+     * 验证微信服务器请求
+     *
+     * @param signature
+     * @param timestamp
+     * @param nonce
+     * @return
+     */
+    public boolean checkWechatSign(String signature, String timestamp, String nonce) {
+        if (StringUtils.isEmpty(signature) || StringUtils.isEmpty(timestamp) || StringUtils.isEmpty(nonce)) {
+            return false;
+        }
+        try {
+            List<String> list = new ArrayList<String>();
+            list.add(ConfigManager.getInstance().getToken());
+            list.add(nonce);
+            list.add(timestamp);
+            Collections.sort(list);
+            StringBuilder builder = new StringBuilder();
+            for (String str : list) {
+                builder.append(str);
+            }
+            String result = WechatSecurity.encode("SHA1", builder.toString());
+            return result.equals(signature);
+        } catch (Exception e) {
+
+        }
+        return false;
+    }
+
+    /**
+     * 获取JS-SDK签名
+     * @param url 不带#的网址
+     * @return
+     * @throws Exception
+     */
+    public Map<String, String> getJsSign(String url) throws Exception{
+        Map<String, String> ret = new HashMap<String, String>();
+        String nonce = WechatSecurity.createNonce();
+        String timestamp = WechatSecurity.createTimestamp();
+        String param;
+        String signature = "";
+        String jsapi_ticket = getJsTicket();
+        // 注意这里参数名必须全部小写，且必须有序
+        param = "jsapi_ticket=" + jsapi_ticket + "&noncestr=" + nonce
+                + "&timestamp=" + timestamp + "&url=" + url;
+        signature=WechatSecurity.encode("SHA-1",param,"UTF-8");
+        ret.put("url", url);
+        ret.put("jsapi_ticket", jsapi_ticket);
+        ret.put("nonce", nonce);
+        ret.put("timestamp", timestamp);
+        ret.put("signature", signature);
+        return ret;
+    }
+
 
 
 }

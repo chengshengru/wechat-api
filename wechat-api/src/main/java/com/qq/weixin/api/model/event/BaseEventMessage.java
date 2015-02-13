@@ -44,6 +44,11 @@ public class BaseEventMessage extends BaseMessage {
 	public static final String WX_MSG_TYPE_EVENT_PIC_PHOTO_OR_ALBUM = "pic_photo_or_album";
 
 	public static final String WX_MSG_TYPE_EVENT_PIC_WEIXIN = "pic_weixin";
+    /**
+     * 事件推送群发结果
+     */
+    public static final String WX_MSG_TYPE_EVENT_MASSSENDJOBFINISH = "MASSSENDJOBFINISH";
+
 
 	protected String Event;
 
@@ -59,4 +64,11 @@ public class BaseEventMessage extends BaseMessage {
 		Event = event;
 	}
 
+
+    @Override
+    public String toString() {
+        return "BaseEventMessage{" +
+                "Event='" + Event + '\'' +
+                "} " + super.toString();
+    }
 }
