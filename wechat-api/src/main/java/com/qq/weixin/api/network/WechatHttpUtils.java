@@ -1,5 +1,6 @@
 package com.qq.weixin.api.network;
 
+import com.qq.weixin.api.cache.TokenCacheAware;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +24,10 @@ public final class WechatHttpUtils {
 
 	@SuppressWarnings("deprecation")
 	private static final String CHATSET = HTTP.UTF_8;
+
+
+
+	private static TokenCacheAware mAware=null;
 
 	/**
 	 * POST
@@ -117,6 +122,7 @@ public final class WechatHttpUtils {
 			if (obj.containsKey("errcode")) {
 				int code = obj.optInt("errcode", 0);
 				if (code != 0) {
+					clearToken(code);
 					throw new InvalidWechatException(code, obj.optString(
 							"errmsg", ""));
 				}
@@ -139,11 +145,34 @@ public final class WechatHttpUtils {
 			if (obj.containsKey("errcode")) {
 				int code = obj.optInt("errcode", 0);
 				if (code != 0) {
+					clearToken(code);
 					throw new InvalidWechatException(code, obj.optString(
 							"errmsg", ""));
 				}
 			}
 		}
 		return result;
+	}
+
+
+
+	private static  void clearToken(int code){
+		switch (code){
+			case 40001:
+			case 40002:
+				if(mAware!=null){
+					try {
+						mAware.clearAccessToken(TokenCacheAware.ACCESS_TOKEN);
+					}catch (Exception e){
+						log.error("Clear Token Error",e);
+					}
+
+				}
+				break;
+		}
+	}
+
+	public static void setCacheAware(TokenCacheAware aware){
+		mAware=aware;
 	}
 }

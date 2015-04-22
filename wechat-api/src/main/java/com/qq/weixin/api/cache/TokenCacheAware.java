@@ -26,4 +26,10 @@ public interface TokenCacheAware {
      */
     AccessToken getAccessToken(int type) throws Exception;
 
+    /**
+     * 清掉Token
+     * @throws Exception
+     */
+    void clearAccessToken(int type) throws Exception;
+
 }

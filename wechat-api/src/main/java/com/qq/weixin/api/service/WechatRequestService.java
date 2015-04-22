@@ -38,6 +38,7 @@ public class WechatRequestService {
 
     public void setTokenCacheAware(TokenCacheAware aware) {
         mCacheAware = aware;
+        WechatHttpUtils.setCacheAware(mCacheAware);
     }
 
     private TokenCacheAware getCacheAware() {
@@ -52,7 +53,7 @@ public class WechatRequestService {
      *
      * @return
      */
-    public AccessToken getAccessToken() throws Exception {
+    public synchronized AccessToken getAccessToken() throws Exception {
         TokenCacheAware aware = getCacheAware();
         AccessToken token = aware.getAccessToken(TokenCacheAware.ACCESS_TOKEN);
         if (token == null) {

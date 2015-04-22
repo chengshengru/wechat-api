@@ -46,4 +46,21 @@ public class MemoryTokenCache implements TokenCacheAware {
         }
         return null;
     }
+
+    @Override
+    public void clearAccessToken(int type) throws Exception {
+        switch (type) {
+            case ACCESS_TOKEN: {
+                mToken = null;
+            }
+            break;
+            case JS_TICKET: {
+                mJsTicket = null;
+            }
+
+            break;
+
+
+        }
+    }
 }
