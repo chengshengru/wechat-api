@@ -1,13 +1,16 @@
 package com.qq.weixin.api.controller;
 
 import com.qq.weixin.api.WechatService;
+import com.qq.weixin.api.model.AccessToken;
 import com.qq.weixin.api.model.BaseMessage;
+import com.qq.weixin.api.service.WechatRequestService;
 import com.qq.weixin.api.utils.XmlParser;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -67,8 +70,26 @@ public class WechatController {
                 writer.close();
             }
         }
+    }
 
 
+    @RequestMapping(value = "/oauth2")
+    public String oauth2(@RequestParam(value = "code", required = false) String code,
+                        @RequestParam(value = "state", required = false) String state,HttpServletResponse response){
+
+        if (StringUtils.isNotEmpty(code)){
+            AccessToken token=null;
+            try {
+                token=WechatRequestService.getInstance().getOAuthToken(code);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (token!=null){
+                String openId=token.getOpenId();
+
+            }
+        }
+        return "";
     }
 
 

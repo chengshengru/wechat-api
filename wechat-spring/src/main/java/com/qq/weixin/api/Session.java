@@ -12,6 +12,11 @@ public class Session implements Serializable {
     private ConcurrentHashMap<String,Object> mAttrs=new ConcurrentHashMap<String, Object>();
 
 
+    private String sid;
+
+
+    private boolean isOAuth=false;
+
     /**
      * 获取属性值
      * @param key
@@ -50,4 +55,30 @@ public class Session implements Serializable {
         mAttrs.clear();
     }
 
+
+    public String getSid() {
+        return sid;
+    }
+
+    public void setSid(String sid) {
+        this.sid = sid;
+    }
+
+
+    public boolean isOAuth() {
+        return isOAuth;
+    }
+
+    public void setOAuth(boolean isOAuth) {
+        this.isOAuth = isOAuth;
+    }
+
+    @Override
+    public String toString() {
+        return "Session{" +
+                "mAttrs=" + mAttrs +
+                ", sid='" + sid + '\'' +
+                ", isOAuth=" + isOAuth +
+                '}';
+    }
 }

@@ -18,7 +18,18 @@ public @interface WechatOauth {
 	 */
 	String value() default "snsapi_base";
 
+    /**
+     * 是否需要授权
+     * @return
+     */
 	boolean required() default true;
 	
 	String state() default "";
+
+
+    /**
+     * 是否强制需要微信授权
+     * @return
+     */
+    boolean force() default true;
 }

@@ -11,6 +11,9 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Created with IntelliJ IDEA.
  * User : developer
@@ -136,6 +139,10 @@ public abstract class WechatService {
      * @throws Exception
      */
     public abstract BaseMessage handleWechatLinkMessage(LinkMessage msg) throws Exception;
+
+
+
+    public abstract Session validateWechat(HttpServletRequest request,HttpServletResponse response);
 
 
 }
