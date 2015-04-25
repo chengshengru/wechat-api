@@ -83,6 +83,7 @@ public class WechatOAuthInterceptor implements HandlerInterceptor {
                         if (session != null) {
                             session.setSid(createSessionId());
                             SessionCache.addCache(session);
+                            //是否需要授权
                             if (session.isOAuth()) {
                                 String url = URLEncoder.encode(ConfigManager.getInstance().getOAuthUrl(), "utf-8");
                                 response.sendRedirect(getAuthorUrl(oauth.value(), url, session.getSid()));
