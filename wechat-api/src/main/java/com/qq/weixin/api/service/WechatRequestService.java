@@ -97,7 +97,7 @@ public class WechatRequestService {
                             , getWechatToken()));
             JSONObject obj = JSONObject.fromObject(result);
             ticket = new AccessToken();
-            ticket.setAccess_token(obj.optString("access_token", null));
+            ticket.setAccess_token(obj.optString("ticket", null));
             ticket.setExpires_in(obj.optLong("expires_in", 7200));
             aware.handleAccessToken(TokenCacheAware.JS_TICKET, ticket);
         }
