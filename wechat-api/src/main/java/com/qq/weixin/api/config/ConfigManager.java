@@ -93,4 +93,20 @@ public class ConfigManager {
         }
         return "mphelper";
     }
+
+
+    public String getResponseTemplateDir(){
+        if (mProperties!=null){
+            return mProperties.getProperty("wechat.template.dir","");
+        }
+        return "";
+    }
+
+
+    public String getServerHost(){
+        if (mProperties!=null){
+            return mProperties.getProperty("system.server.host","");
+        }
+        return "";
+    }
 }
