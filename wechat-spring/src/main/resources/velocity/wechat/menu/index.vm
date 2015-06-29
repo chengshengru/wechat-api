@@ -1,0 +1,388 @@
+#set($layout="/layout/manage_layout.vm")
+#set($title="微信菜单管理")
+<style type="text/css">
+    html,body{
+        margin:0;
+        padding:0;
+        width:100%;
+        height:100%;
+    }
+    .screen{
+        width:320px;
+        height:568px;
+        border:1px solid #c8c8c8;
+        /*margin:0 auto; */
+        display:table;
+        vertical-align:bottom;
+        float:left;
+     }
+     .menu-col{
+         display:table-cell;
+         width:33.33%;
+         border-right:1px solid #c8c8c8;
+         vertical-align:bottom;
+     }
+     .screen.menu-col:last-child{
+         border:0px;
+     }
+            .addMenu,.menu{
+                width:100%;
+                border-top:1px solid #c8c8c8;
+                height:50px;
+                cursor:pointer;
+                text-align:center;
+                overflow:hidden;
+                line-height:50px;
+                font-family:'微软雅黑';
+                position:relative;
+            }
+            .close{
+                width:24px;
+                height:24px;
+                background-image: url(/img/wechat/response/btn_close.png);
+                background-repeat:no-repeat;
+                background-size:100% 100%;
+                position:absolute;
+                right:0;
+                top:0;
+            }
+            .menu.selected{
+                background-color:#c8c8c8;
+            }
+            .menu.error{
+                background-color:red;
+            }
+            .settings{
+                width:350px;
+                float:right;
+            }
+        </style>
+        <script type="text/javascript">
+            var MAX_MEUN_COUNT = 5;
+            var MaxItemDiv= MAX_MEUN_COUNT + 1;
+            $(function(){
+            
+                
+            
+            
+                            var eventType =$('#eventType');
+                            $(document).on('click','.close',function(){
+                                var parent=$(this).parent();
+                                var root=parent.parent();
+                                parent.remove();
+                                if(root.find('.menu').length < MaxItemDiv){
+                                    root.find('.addMenu').show();
+                                    if(root.find('.menu').length == 0){
+                                        //初始化
+                                        initForm();
+                                    }
+                                }
+                                return false;
+                            });
+                            
+                            $(document).on("click",".menu",function(){
+                                $(".menu.selected").removeClass('selected');
+                                var type=$(this).attr('data-type');
+
+                                $(this).addClass("selected");
+                                eventType.val(type==''?'view':type);
+                                $('#name').val($(this).find('.name').html());
+                                if(type != 'view'){
+                                    $('#key').val($(this).attr('data-key'));
+                                    $('#url').val('');
+                                }else{
+                                    $('#url').val($(this).attr('data-url'));
+                                    $('#key').val('');
+                                }
+                            
+                                setMode('view' == type);
+                        
+                            });
+                    
+                            $('.addMenu').click(function(){
+                                $(".menu.selected").removeClass('selected');
+                                var c=$('.'+$(this).attr('data-role'));
+                                $(createMenuItem()).insertAfter($(this));
+                        
+                                if(c.find('.menu').length>=MaxItemDiv){
+                                    $(this).hide();
+                                }
+                                initForm(); 
+                            });
+                            $('#eventType').change(function(){
+                                var type=$(this).val();
+                                setMode('view' == type);
+                            });
+                    
+                            $('#save').click(function(){
+                                var cms=$('.menu.selected');
+                                if(cms.length <= 0){
+                                    alert('请先选择菜单项');
+                                    return;
+                                }
+                            
+                                var name=$('#name').val();
+                                
+                                if(name == ''){
+                                    alert('请输入菜单名称');
+                                    return;
+                                }
+                                var type=$('#eventType').val();
+                                
+                                if(type == 'view'){
+                                    var url = $('#url').val();
+                                    
+                                    if(url == ''){
+                                        alert('请输入跳转链接');
+                                        return;
+                                    }
+                                    cms.attr('data-url',url);
+                                }else{
+                                    var key=$('#key').val();
+                                    if(key == ''){
+                                        alert('输入事件Key');
+                                        return;
+                                    }
+                                    cms.attr('data-key',key);
+                                }
+                                cms.attr('data-type',type).find('.name').html(name);
+                    
+                            });
+                            
+                            
+                            
+                            loadMenu();
+                            var cm=['first','second','third'];
+                            
+                            function initForm(){
+                                $('#name').val('');
+                                $('#url').val('');
+                                $('key').val('');
+                                $('#eventType').val('view');
+                            }
+                            function setMode(isView){
+                                if(isView){
+                                    $('#form-url').show();
+                                    $('#form-key').hide();
+                                }else{
+                                    $('#form-url').hide();
+                                    $('#form-key').show();
+                                }
+                            }
+                            function parseMenu(menu){
+                                if(menu ==null || menu == 'undefined'){
+                                    return;
+                                }
+                                var button=menu.button;
+                                if(button != null && button.length >0){
+                            
+                                    for(var i=0;i<button.length;i++){
+                                        var c=$('.'+cm[i]);
+                                        var add=$('.addMenu[data-role="'+cm[i]+'"]');
+                                        var html="";
+                                        var item=button[i];
+                                        var type=item.type;
+                                        if(type == null || type== 'undefined'){
+                                            //一级菜单
+                                            var subButton=item.sub_button;
+                                            if(subButton !=null && subButton.length > 0){
+                                                for(var j=0;j<subButton.length;j++){
+                                                    var subItem=subButton[j];
+                                                    html += createMenuItem(subItem);
+                                                }
+                                            }
+                                    
+                                            if(subButton.length >= MAX_MEUN_COUNT){
+                                                add.hide();
+                                            }
+                                        }
+                                        html += createMenuItem(item);
+                                        //TODO 移除之后的节点
+                                        $(html).insertAfter(add);
+                                    }
+                                }
+                            }
+                            
+                    
+                    
+                    function createMenuItem(item){
+                        if(item != null && item != 'undefined'){
+                            var name=item.name;
+                            if(name == 'undefined' || name== null){
+                                name = '';
+                            }
+                            var type=item.type;
+                            if(type == 'undefined' || type == null){
+                                type = 'view';
+                            }
+                            var key=item.key;
+                            if(key == 'undefined' || key== null){
+                                key = '';
+                            }
+                            var url=item.url;
+                            if(url == 'undefined' || url == null){
+                                url='';
+                            }
+                            return '<div class="menu" data-key="'+key+'" data-type="'+type+'" data-url="'+url+'"><div class="name">'+name+'</div><div class="close"></div></div>';
+                        }else{
+                            return '<div class="menu selected" data-key="" data-type="" data-url=""><div class="name"></div><div class="close"></div></div>';
+                        
+                        }
+                        
+                    }
+                    
+                    
+                    function genMenuJson(){
+                        var menuJson= [];
+                        for(var i=0;i<cm.length;i++){
+                            var clazz=$('.'+cm[i]);
+                            var ms=clazz.find('.menu');
+                            var len = ms.length;
+                            if(ms.length> 0){
+                                var item={};
+                                var root=ms.eq(ms.length - 1);
+                                item.name=root.find('.name').html();
+                                if(len > 1){
+                                    var subItem = [];
+                                    for(var j=0;j<len-1;j++){
+                                        var si={};
+                                        var sub=ms.eq(j);
+                                        si.name=sub.find('.name').html();
+                                        var type= sub.attr('data-type');
+                                        si.type=type;
+                                        if(type == 'view'){
+                                            si.url=sub.attr('data-url');
+                                        }else{
+                                            si.key=sub.attr('data-key');
+                                        }
+                                        subItem.push(si);
+                                    }
+                                    item.sub_button=subItem;
+                                    
+                                }else{
+                                    var type=root.attr('data-type');
+                                    item.type=type;
+                                    if(type == 'view'){
+                                        item.url=root.attr('data-url');
+                                    }else{
+                                        item.key=root.attr('data-key');
+                                    }
+                                }
+                                
+                                
+                                
+                                menuJson.push(item);
+                            }
+                            
+                        }
+                        var menu={};
+                        menu.button=menuJson;
+                        return JSON.stringify(menu);
+                    }
+                    
+                    $('#sync').click(function(){
+                        var result=window.confirm('确定要发布么？');
+                        if(result){
+                            var menu=genMenuJson();
+                            syncMenu(menu);
+                        }
+                    });
+                    
+                    
+                    function syncMenu(menu){
+                        jQuery.ajax({
+                            url : '/admin/wechat/menu/pub',
+                            type: 'post',
+                            dataType : 'json',
+                            data : { 'menu' : menu },
+                            success:function(result){
+                                alert(result.msg);
+                            },
+                            error:function(){
+                                alert('网络超时,发布失败!');
+                            }
+                        });
+                    
+                    }
+                    
+                    function loadMenu(){
+                        jQuery.ajax({
+                            url : '/admin/wechat/menu/sync',
+                            type: 'GET',
+                            dataType : 'json',
+                            success:function(result){
+                                if(result != null){
+                                    parseMenu(result.menu);
+                                }
+                                
+                            },
+                            error:function(){
+                                alert('网络超时,加载失败!');
+                            }
+                        });
+                    }
+                    
+                });
+                
+                    
+                    
+                    
+                    
+        
+        </script>
+    </head>
+    
+    <body>
+        <div class="container" style="width:720px;margin-top:10px;">
+            <div class="screen">
+                <div class="menu-col first">
+                    <div class="addMenu" data-type="add" data-role="first">+</div>
+                </div>
+                <div class="menu-col second">
+                    <div class="addMenu" data-type="add" data-role="second">+</div>
+                </div>
+                <div class="menu-col third" style="border:0px;">
+                    <div class="addMenu" data-type="add" data-role="third">+</div>
+                </div>
+            </div>
+            
+            <div class="settings">
+                <div class="form-group">
+                    <label for="shareUrl">菜单名称:</label>
+                    <input type="text" placeholder="请输入菜单名称" id="name" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="shareUrl">菜单类型:</label><br />
+                    <select name="resType" id="eventType" class="form-control">
+                        <option value="view">跳转URL</option>
+                        <option value="click">点击推事件</option>
+                        <option value="scancode_push">扫码推事件</option>
+                        <option value="scancode_waitmsg">扫码推事件且弹出“消息接收中”提示框</option>
+                        <option value="pic_sysphoto">弹出系统拍照发图</option>
+                        <option value="pic_photo_or_album">弹出拍照或者相册发图</option>
+                        <option value="pic_weixin">弹出微信相册发图器</option>
+                        <option value="location_select">弹出地理位置选择器</option>
+                        ##<option value="media_id">下发消息（除文本消息）</option>
+                        ##<option value="view_limited">跳转图文消息URL</option>
+                        
+                    </select>
+                </div>
+                <div class="form-group" id="form-url">
+                    <label for="shareUrl">跳转链接:</label>
+                    <input type="text" placeholder="输入链接" id="url" class="form-control"/>
+                </div>
+                <div class="form-group" id="form-key" style="display:none;">
+                    <label for="shareUrl">事件Key:</label>
+                    <input type="text" placeholder="输入事件Key（与自动回复保持一致）" id="key" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <div id="save" class="btn btn-success">保存菜单项</div>
+                    <div id="get" class="btn btn-success" style="display:none;">获取菜单</div>
+                    <div id="sync" class="btn btn-danger"  >发布菜单</div>
+                </div>  
+            </div>
+        </div>
+        
+        
+    </body>
+</html>

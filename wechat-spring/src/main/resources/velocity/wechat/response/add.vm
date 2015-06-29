@@ -1,0 +1,280 @@
+##添加微信自动回复
+#set($layout="/layout/manage_layout.vm")
+<script type="text/javascript">
+	$(function(){
+		var container=$("#article-container");
+		var temp=$("#temp").html();
+		$("#add").click(function(){
+			if($(".article").length>=10){
+				alert("最多只能创建10条图文消息");			
+			}else{
+				var article=$('<div class="article">'+temp+'</div>');
+				article.find("input[type='text']").val('');
+				var btnClose=article.find('.btn-close');
+				btnClose.css("visibility","visible");
+				btnClose.click(function(){
+					$(this).parent().remove();
+				});
+				container.append(article);
+			}
+		
+
+		});
+		
+		
+		$(".btn-close[data-action='close']").click(function(){
+			$(this).parent().remove();
+		});
+		
+		
+		$("#resType").change(function(){
+			var resType=$(this).val();
+			$(".multi-container").hide();
+			$(".multi-container[data-role='"+resType+"']").show();
+			if(resType=='text'){
+			
+			
+			}else if(resType=='image'){
+			
+			}else if(resType=='news'){
+			
+			}else if(resType=='video'){
+			
+			}
+		
+		});
+		
+		var isSaving=false;
+		
+		$("#save").click(function(){
+			if(isSaving){
+				return;
+			}
+			var resName=$("#resName").val();
+			if(resName==''){
+				alert('请输入昵称');
+				return;
+			}
+			var resKey=$("#resKey").val();
+			if(resKey==''){
+				alert('请输入Key');
+				return;
+			}
+			var resType=$("#resType").val();
+			var resId=$("#resId").val();
+			var resContent='';
+			if(resType=='text'){
+				resContent=	$("#resContent").val();
+				if(resContent==''){
+					alert('请输入内容');
+					return;
+				}
+				
+			}else if(resType=='image'){
+				resContent=$("input[data-role='"+resType+"']").val();
+				if(resContent==''){
+					alert('请输入地址');
+					return;
+				}
+			}else if(resType=='news'){
+				var r= checkArticle();
+				if(r==20){
+					var articles=$(".article");
+					var data=[];
+					for(var i=0;i<articles.length;i++){
+						var article=articles.eq(i);
+						var item={};
+						item.title=article.find("input[name='title']").val();
+						item.desc=article.find("input[name='desc']").val();
+						item.url=article.find("input[name='url']").val();
+						item.picUrl=article.find("input[name='picUrl']").val();
+						data[i]=item;
+					}
+					resContent=JSON.stringify(data);
+				}else{
+					alert('第'+(r+1)+"条数据标题为空!");
+					return;
+				}
+			}else if(resType=='video'){
+				resContent=$("input[data-role='"+resType+"']").val();
+				if(resContent==''){
+					alert('请输入地址');
+					return;
+				}
+			}
+			
+			
+			jQuery.ajax({
+				url:'save',
+				dataType:'json',
+				type:'post',
+				data:{'resId':resId,'resName':resName,'resKey':resKey,'resContent':resContent,'resType':resType,'resSaveType':'json','token':'$!{token}'},
+				beforeSend:function(){
+					isSaving=true;
+				},
+				success:function(data){
+					if(data['code']==1){
+						
+					}
+					alert(data['msg']);
+				},
+				complete:function(){
+					isSaving=false;
+				}
+			
+			
+			
+			});
+			
+			
+			
+			
+		});
+		
+		function checkArticle(){
+			var articles=$(".article");
+			var length=articles.length;
+			for(var i=0;i<length;i++){
+				var article=articles.eq(i);
+				var title=article.find("input[name='title']").val();
+				if(title==''){
+					return i;
+				}
+			}
+			return 20;
+		}
+		
+	});
+</script>
+
+
+<style type="text/css">
+.article{
+	position: relative;
+	margin: 15px 0;
+	padding: 0px 19px 14px;
+	background-color: #fff;
+	border: 1px solid #ddd;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+.btn-close{
+	width:39px;
+	height:39px;
+	background-image:url('/img/msg/btn_close.png');
+	background-size:100% 100%;
+	float:right;
+	top: -10px;
+	right: -40px;
+	position: relative;
+	visibility:hidden;
+	cursor:pointer;
+}
+.multi-container{
+	display:none;
+}
+
+#if($!{res})
+.multi-container[data-role='$!{res.resType}']{
+	display:block;
+}
+#else
+.multi-container[data-role='text']{
+	display:block;
+}
+#end
+
+
+</style>
+<div style="width:640px;margin:0 auto;">
+	<div class="form-group">
+		<input type="hidden" value="#if($!{res})$!{res.resId}#else -1#end" name="resId" id="resId"/>
+		<label for="resName">回复名称</label>
+		<input type="text" class="form-control" id="resName" placeholder="名称" name="resName" value="$!{res.resName}"/>
+	</div>
+	<div class="form-group">
+		<label for="resKey">获取key</label>
+		<input type="text" class="form-control" id="resKey" placeholder="key(英文)" name="resKey" value="$!{res.resKey}" #if($!{res}) readonly="readonly"#end/>
+	</div>
+	<div class="form-grop">
+		<label for="shareUrl">消息类别</label>
+		<select name="resType" id="resType">
+			<option value="text" #if($!{res.resType}=="text") selected="selected" #end>文本消息</option>
+			##<option value="image" #if($!{res.resType}=="image") selected="selected" #end>图片消息</option>
+			##<option value="video" #if($!{res.resType}=="video") selected="selected" #end>视频消息</option>
+			<option value="news" #if($!{res.resType}=="news") selected="selected" #end>图文消息</option>
+		</select>
+	</div>
+	<div class="multi-container" data-role="text">
+		<div class="form-group">
+			<label for="shareUrl">内容</label>
+			<textarea class="form-control" rows="3" name="resContent" id="resContent" style="resize:none;">#if($!{res.resType}=="text")$!{res.resContent}#end</textarea>
+		</div>
+	</div>
+	<div class="multi-container" data-role="image">
+		<div class="form-group">
+			<label for="shareUrl">图片地址</label>
+			<input type="text" class="form-control" placeholder="图片地址" name="url" data-role="image" />
+		</div>
+	</div>
+	<div class="multi-container" data-role="video">
+		<div class="form-group">
+			<label for="shareUrl">视频地址</label>
+			<input type="text" class="form-control" placeholder="图片地址" name="url" data-role="video"/>
+		</div>
+	</div>
+	<div class="multi-container" data-role="news">
+		<label for="shareUrl">图文信息</label>
+		<!-- 图文消息 -->
+		<div id="article-container">
+		#if(($!{res.resType}=="news")&&$!{res.resNews}&&$!{res.resNews.size()}>0)
+			#foreach($article in ${res.resNews})
+			<div class="article" #if($velocityCount==1) id="temp" #end>
+				<div class="btn-close" #if($velocityCount!=1) style="visibility:visible;" data-action="close"#end></div>
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="标题" name="title" value="$!{article.Title}"/>
+				</div>
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="文章摘要" name="desc"  value="$!{article.Description}"/>
+				</div>
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="跳转链接" name="url"  value="$!{article.Url}"/>
+				</div>
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="图片链接" name="picUrl"  value="$!{article.PicUrl}"/>
+				</div>
+			</div>
+			#end
+		#else
+		
+		
+			<div class="article" id="temp">
+				<div class="btn-close"></div>
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="标题" name="title"/>
+				</div>
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="文章摘要" name="desc" />
+				</div>
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="跳转链接" name="url" />
+				</div>
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="图片链接" name="picUrl" />
+				</div>
+			</div>
+		
+		#end
+		</div>
+
+		<div class="form-group">
+  			<button type="button" class="btn btn-default" style="width:100%" id="add">新增图文</button>
+		</div>
+	</div>
+	
+	<div class="form-group">
+  		<button type="button" class="btn btn-success" style="width:100%" id="save">保存</button>
+	</div>
+		
+</div>
