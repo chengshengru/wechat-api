@@ -155,6 +155,20 @@ public final class WechatHttpUtils {
 	}
 
 
+	/**
+	 * 获取HttpEntity对象（多媒体文件下载使用）
+	 * @param url
+	 * @return
+	 * @throws Exception
+	 */
+	public static HttpEntity getHttpEntity(String url) throws Exception{
+
+
+
+
+		return null;
+	}
+
 
 	private static  void clearToken(int code){
 		switch (code){

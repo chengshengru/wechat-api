@@ -573,6 +573,43 @@ public class WechatRequestService {
     }
 
     /**
+     * 获取菜单
+     * @return 菜单字符串
+     */
+    public String getMenu(){
+        try {
+            String result= WechatHttpUtils.getWechat(String.format(WechatConstant.WX_MENU_GET_URL,getWechatToken()));
+            return result;
+        } catch (Exception e) {
+
+        }
+        return "";
+    }
+
+    /**
+     * 创建菜单
+     * @param menu
+     * @return 1 成功
+     */
+    public int createMenu(String menu) {
+        try {
+            WechatHttpUtils.postWechat(String.format(WechatConstant.WX_MENU_CREATE_URL,getWechatToken()), menu);
+            return 1;
+        } catch (Exception e) {
+
+        }
+        return 0;
+    }
+
+    /**
+     * 删除菜单
+     * @return
+     */
+    public int deleteMenu(){
+        return 0;
+    }
+
+    /**
      * 上传图文消息素材【订阅号与服务号认证后均可用】
      *
      * @param medias

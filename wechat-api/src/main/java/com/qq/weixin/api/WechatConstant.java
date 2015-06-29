@@ -137,4 +137,21 @@ public final class WechatConstant {
     public static final String WX_SEND_TEMPLATE_URL=WX_API_SERVICE_URL+"/message/template/send?access_token=%s";
 
 
+	private static final String WX_MENU_API_URL = WX_API_SERVICE_URL + "/menu";
+
+	/**
+	 * 创建菜单
+	 */
+	public static final String WX_MENU_CREATE_URL = WX_MENU_API_URL
+			+ "/create?access_token=%s";
+	/**
+	 * 查询菜单
+	 */
+	public static final String WX_MENU_GET_URL = WX_MENU_API_URL
+			+ "/get?access_token=%s";
+	/**
+	 * 删除菜单
+	 */
+	public static final String WX_MENU_DELETE_URL = WX_MENU_API_URL
+			+ "/delete?access_token=%s";
 }
